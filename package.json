@@ -1,6 +1,6 @@
 {
 	"name": "@careswitch/svelte-data-table",
-	"version": "0.1.4",
+	"version": "0.1.5",
 	"repository": "github:careswitch/svelte-data-table",
 	"scripts": {
 		"dev": "vite dev",
