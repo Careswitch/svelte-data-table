@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.1.4
+
+### Patch Changes
+
+- f1dbcb6: changeset publish command
+
 ## 0.1.3
 
 ### Patch Changes
