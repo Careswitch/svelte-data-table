@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.1.6
+
+### Patch Changes
+
+- 54343e2: Set changeset config access to public
+
 ## 0.1.5
 
 ### Patch Changes
