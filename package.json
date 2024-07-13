@@ -1,12 +1,13 @@
 {
 	"name": "@careswitch/svelte-data-table",
-	"version": "0.1.1",
+	"version": "0.1.7",
 	"repository": "github:careswitch/svelte-data-table",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run package",
 		"preview": "vite preview",
 		"package": "svelte-kit sync && svelte-package && publint",
+		"release": "changeset publish",
 		"prepublishOnly": "npm run package",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -29,6 +30,7 @@
 		"svelte": "^5.0.0-next.1"
 	},
 	"devDependencies": {
+		"@changesets/cli": "^2.27.7",
 		"@sveltejs/adapter-auto": "^3.0.0",
 		"@sveltejs/kit": "^2.0.0",
 		"@sveltejs/package": "^2.0.0",
