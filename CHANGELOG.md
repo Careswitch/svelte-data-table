@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.2.2
+
+### Patch Changes
+
+- 58f6cdb: Package description, license, and keywords
+
 ## 0.2.1
 
 ### Patch Changes
