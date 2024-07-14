@@ -35,7 +35,8 @@
 			<div>
 				<h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl">Svelte Data Table</h1>
 				<p class="text-lg text-muted-foreground">
-					Small, fast data table library with client-side sorting, filtering, and pagination.
+					Small, fast data table library for Svelte 5 with client-side sorting, filtering, and
+					pagination.
 				</p>
 			</div>
 			<Button size="icon" variant="ghost" href="https://github.com/Careswitch/svelte-data-table">

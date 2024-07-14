@@ -1,7 +1,20 @@
 {
 	"name": "@careswitch/svelte-data-table",
+	"description": "Small, fast data table library for Svelte 5 with client-side sorting, filtering, and pagination.",
 	"version": "0.2.1",
 	"homepage": "https://careswitch-svelte-data-table.vercel.app",
+	"license": "MIT",
+	"keywords": [
+		"svelte",
+		"sveltekit",
+		"data",
+		"table",
+		"datatable",
+		"grid",
+		"sort",
+		"filter",
+		"paginate"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/careswitch/svelte-data-table.git"
