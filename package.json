@@ -1,6 +1,7 @@
 {
 	"name": "@careswitch/svelte-data-table",
 	"version": "0.2.0",
+	"homepage": "https://careswitch-svelte-data-table.vercel.app",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/careswitch/svelte-data-table.git"
