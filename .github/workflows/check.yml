@@ -17,5 +17,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint and svelte-check
+      - name: svelte-check
         run: npm run check
+
+      - name: Unit tests
+        run: npm test
