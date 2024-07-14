@@ -1,11 +1,33 @@
-<h1 align="center">@careswitch/svelte-data-table</h1>
+<h1 align="center">svelte-data-table</h1>
 
-<p align="center">Simple data table library with client-side sorting, filtering, and pagination.</p>
+<p align="center">Small, fast data table library with client-side sorting, filtering, and pagination.</p>
 
 - No dependencies
 - TypeScript
-- SvelteKit, SSR, and Svelte 5 Runes
+- Supports SvelteKit, SSR, Svelte 5
 
-## Quickstart
+## Installation
 
-`npm install @careswitch/svelte-data-table`
+```bash
+npm install @careswitch/svelte-data-table
+```
+
+## Usage
+
+```svelte
+<script lang="ts">
+	import { DataTable } from '@careswitch/svelte-data-table';
+
+	const table = new DataTable({
+		data: [
+			{ id: 1, name: 'John Doe', status: 'active' },
+			{ id: 2, name: 'Jane Doe', status: 'inactive' }
+		],
+		columns: [
+			{ key: 'id', name: 'ID' },
+			{ key: 'name', name: 'Name' },
+			{ key: 'status', name: 'Status', sortable: false }
+		]
+	});
+</script>
+```
