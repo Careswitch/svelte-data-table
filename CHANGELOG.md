@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.4.0
+
+### Minor Changes
+
+- 26bea0d: Rename `filters` to `filterState`; introduce `sortState`, refactor filter mutators to reassign object
+
 ## 0.3.0
 
 ### Minor Changes
