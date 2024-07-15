@@ -5,6 +5,7 @@
 - No dependencies
 - Blazing fast thanks to Svelte 5 and fine-grained reactivity
 - Fully typed with TypeScript
+- Comprehensive unit tests
 - Supports SvelteKit and SSR
 - Works great with shadcn [data table](https://www.shadcn-svelte.com/docs/components/data-table)
 
