@@ -29,7 +29,7 @@
 	];
 </script>
 
-<div class="mx-auto h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="mx-auto h-dvh max-w-7xl px-4 sm:px-6 lg:px-8">
 	<div class="grid h-full grid-cols-1 grid-rows-[auto,auto,1fr,auto]">
 		<div class="flex justify-between pb-4 pt-12">
 			<div>
