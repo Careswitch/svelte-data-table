@@ -62,4 +62,4 @@ _Requires Svelte 5 peer dependency_
 
 ## Examples
 
-Reference the demo website [+page.svelte](./src/routes/+page.svelte) for a more comprehensive example.
+Refer to the demo website [+page.svelte](./src/routes/+page.svelte) and [unit tests](./src/index.test.ts) for more comprehensive examples.
