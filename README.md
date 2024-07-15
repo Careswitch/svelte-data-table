@@ -3,9 +3,11 @@
 ---
 
 - No dependencies
-- TypeScript
-- Supports SvelteKit, SSR, Svelte 5
-- Works great with shadcn [Data Table](https://www.shadcn-svelte.com/docs/components/data-table)
+- Blazing fast thanks to Svelte 5 and fine-grained reactivity
+- Fully typed with TypeScript
+- Comprehensive unit tests
+- Supports SvelteKit and SSR
+- Works great with shadcn [data table](https://www.shadcn-svelte.com/docs/components/data-table)
 
 ## Demo
 
@@ -60,4 +62,4 @@ _Requires Svelte 5 peer dependency_
 
 ## Examples
 
-Reference the demo website [+page.svelte](./src/routes/+page.svelte) for a more comprehensive example.
+Refer to the demo website [+page.svelte](./src/routes/+page.svelte) and [unit tests](./src/index.test.ts) for more comprehensive examples.

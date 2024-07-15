@@ -29,9 +29,9 @@
 	];
 </script>
 
-<div class="mx-auto h-screen max-w-7xl px-4 sm:px-6 lg:px-8">
+<div class="mx-auto h-dvh max-w-7xl px-4 sm:px-6 lg:px-8">
 	<div class="grid h-full grid-cols-1 grid-rows-[auto,auto,1fr,auto]">
-		<div class="flex justify-between pb-4 pt-12">
+		<div class="flex justify-between gap-4 pb-4 pt-12">
 			<div>
 				<h1 class="text-4xl font-extrabold tracking-tight lg:text-5xl">Svelte Data Table</h1>
 				<p class="text-lg text-muted-foreground">
@@ -39,7 +39,12 @@
 					pagination.
 				</p>
 			</div>
-			<Button size="icon" variant="ghost" href="https://github.com/Careswitch/svelte-data-table">
+			<Button
+				class="shrink-0"
+				size="icon"
+				variant="ghost"
+				href="https://github.com/Careswitch/svelte-data-table"
+			>
 				<GithubLogo class="size-6" />
 			</Button>
 		</div>
@@ -105,13 +110,17 @@
 			<Table.Body>
 				{#each table.rows as row (row.id)}
 					<Table.Row>
-						<Table.Cell>{row.id}</Table.Cell>
-						<Table.Cell>{row.name}</Table.Cell>
-						<Table.Cell>
-							<Badge variant={row.status === 'active' ? 'secondary' : 'outline'}>
-								{row.status === 'active' ? 'Active' : 'Inactive'}
-							</Badge>
-						</Table.Cell>
+						{#each table.columns as column (column.key)}
+							{#if column.key === 'status'}
+								<Table.Cell>
+									<Badge variant={row.status === 'active' ? 'secondary' : 'outline'}>
+										{row.status === 'active' ? 'Active' : 'Inactive'}
+									</Badge>
+								</Table.Cell>
+							{:else}
+								<Table.Cell>{row[column.key]}</Table.Cell>
+							{/if}
+						{/each}
 					</Table.Row>
 				{/each}
 			</Table.Body>
