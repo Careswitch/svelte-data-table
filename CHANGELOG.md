@@ -1,5 +1,17 @@
 # @careswitch/svelte-data-table
 
+## 0.3.0
+
+### Minor Changes
+
+- 57b1ab6: Expose read and write access to base row data
+
+### Patch Changes
+
+- 57b1ab6: JSDoc comments for better documentation
+- 57b1ab6: Expand test coverage for edge cases
+- 57b1ab6: Performance improvements with fine-grained reactivity
+
 ## 0.2.2
 
 ### Patch Changes
