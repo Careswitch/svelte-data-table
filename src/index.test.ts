@@ -243,6 +243,121 @@ describe('DataTable', () => {
 		});
 	});
 
+	describe('baseRows functionality', () => {
+		const sampleData = [
+			{ id: 1, name: 'Alice', age: 30 },
+			{ id: 2, name: 'Bob', age: 25 },
+			{ id: 3, name: 'Charlie', age: 35 }
+		];
+
+		const columns = [
+			{ key: 'id', name: 'ID', sortable: true },
+			{ key: 'name', name: 'Name', sortable: true },
+			{ key: 'age', name: 'Age', sortable: true }
+		] satisfies ColumnDef<(typeof sampleData)[0]>[];
+
+		it('should return the original data when getting baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			expect(table.baseRows).toEqual(sampleData);
+		});
+
+		it('should update the data when setting baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			const newData = [
+				{ id: 4, name: 'David', age: 40 },
+				{ id: 5, name: 'Eve', age: 45 }
+			];
+			table.baseRows = newData;
+			expect(table.baseRows).toEqual(newData);
+			expect(table.rows).toEqual(newData);
+		});
+
+		it('should reset currentPage to 1 when setting baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 1 });
+			table.currentPage = 2;
+			table.baseRows = [{ id: 4, name: 'David', age: 40 }];
+			expect(table.currentPage).toBe(1);
+		});
+
+		it('should maintain existing filters when setting baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.setFilter('age', [30]);
+			const newData = [
+				{ id: 4, name: 'David', age: 30 },
+				{ id: 5, name: 'Eve', age: 45 },
+				{ id: 6, name: 'Frank', age: 30 }
+			];
+			table.baseRows = newData;
+			expect(table.rows).toHaveLength(2);
+			expect(table.rows.every((row) => row.age === 30)).toBe(true);
+		});
+
+		it('should apply existing filters to new baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.setFilter('age', [40, 45]);
+			const newData = [
+				{ id: 4, name: 'David', age: 40 },
+				{ id: 5, name: 'Eve', age: 45 },
+				{ id: 6, name: 'Frank', age: 50 }
+			];
+			table.baseRows = newData;
+			expect(table.rows).toHaveLength(2);
+			expect(table.rows.every((row) => row.age === 40 || row.age === 45)).toBe(true);
+		});
+
+		it('should maintain sort state when setting baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.toggleSort('age');
+			const newData = [
+				{ id: 4, name: 'David', age: 50 },
+				{ id: 5, name: 'Eve', age: 45 }
+			];
+			table.baseRows = newData;
+			expect(table.rows[0].name).toBe('Eve');
+			expect(table.rows[1].name).toBe('David');
+		});
+
+		it('should handle setting baseRows to an empty array', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.baseRows = [];
+			expect(table.baseRows).toEqual([]);
+			expect(table.rows).toEqual([]);
+			expect(table.totalPages).toBe(1);
+		});
+
+		it('should handle setting baseRows with different data structure', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			const newData = [
+				{ id: 4, name: 'David', age: 40, newField: 'value' },
+				{ id: 5, name: 'Eve', age: 45, newField: 'another value' }
+			];
+			table.baseRows = newData;
+			expect(table.baseRows).toEqual(newData);
+			expect(table.rows).toEqual(newData);
+		});
+
+		it('should update global filter results when setting baseRows', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.globalFilter = 'Alice';
+			expect(table.rows).toHaveLength(1);
+			table.baseRows = [
+				{ id: 4, name: 'David', age: 40 },
+				{ id: 5, name: 'Alice Smith', age: 45 }
+			];
+			expect(table.rows).toHaveLength(1);
+			expect(table.rows[0].name).toBe('Alice Smith');
+		});
+
+		it('should handle setting baseRows multiple times', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.baseRows = [{ id: 4, name: 'David', age: 40 }];
+			table.baseRows = [{ id: 5, name: 'Eve', age: 45 }];
+			table.baseRows = [{ id: 6, name: 'Frank', age: 50 }];
+			expect(table.baseRows).toHaveLength(1);
+			expect(table.baseRows[0].name).toBe('Frank');
+		});
+	});
+
 	describe('Edge Cases', () => {
 		it('should handle repeated toggling of sort', () => {
 			const table = new DataTable({ data: sampleData, columns });

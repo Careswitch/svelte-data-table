@@ -140,6 +140,23 @@ export class DataTable<T> {
 	}
 
 	/**
+	 * Gets or sets the base data rows without any filtering or sorting applied.
+	 * @returns {T[]} An array of all rows.
+	 */
+	get baseRows() {
+		return this.#originalData;
+	}
+
+	/**
+	 * @param {T[]} rows - The array of rows to reset the base data to.
+	 */
+	set baseRows(rows: T[]) {
+		this.#originalData = [...rows];
+		this.#currentPage = 1;
+		this.#isFilterDirty = true;
+	}
+
+	/**
 	 * The current page of rows based on applied filters and sorting.
 	 * @returns {T[]} An array of rows for the current page.
 	 */
