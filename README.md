@@ -33,9 +33,9 @@ _Requires Svelte 5 peer dependency_
 			{ id: 2, name: 'Jane Doe', status: 'inactive' }
 		],
 		columns: [
-			{ key: 'id', name: 'ID' },
-			{ key: 'name', name: 'Name' },
-			{ key: 'status', name: 'Status' }
+			{ id: 'id', key: 'id', name: 'ID' },
+			{ id: 'name', key: 'name', name: 'Name' },
+			{ id: 'status', key: 'status', name: 'Status' }
 		]
 	});
 </script>
@@ -43,7 +43,7 @@ _Requires Svelte 5 peer dependency_
 <table>
 	<thead>
 		<tr>
-			{#each table.columns as column (column.key)}
+			{#each table.columns as column (column.id)}
 				<th>{column.name}</th>
 			{/each}
 		</tr>
@@ -51,7 +51,7 @@ _Requires Svelte 5 peer dependency_
 	<tbody>
 		{#each table.rows as row (row.id)}
 			<tr>
-				{#each table.columns as column (column.key)}
+				{#each table.columns as column (column.id)}
 					<td>{row[column.key]}</td>
 				{/each}
 			</tr>

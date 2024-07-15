@@ -17,9 +17,9 @@
 		pageSize: 25,
 		data: data.users,
 		columns: [
-			{ key: 'id', name: 'ID' },
-			{ key: 'name', name: 'Name' },
-			{ key: 'status', name: 'Status', sortable: false }
+			{ id: 'id', key: 'id', name: 'ID' },
+			{ id: 'name', key: 'name', name: 'Name' },
+			{ id: 'status', key: 'status', name: 'Status', sortable: false }
 		]
 	});
 
@@ -83,19 +83,19 @@
 		<Table.Root>
 			<Table.Header>
 				<Table.Row class="sticky top-0 z-10 *:bg-background">
-					{#each table.columns as column (column.key)}
+					{#each table.columns as column (column.id)}
 						<Table.Head>
 							<button
 								class="flex items-center"
-								onclick={() => table.toggleSort(column.key)}
-								disabled={!table.isSortable(column.key)}
+								onclick={() => table.toggleSort(column.id)}
+								disabled={!table.isSortable(column.id)}
 							>
 								{column.name}
-								{#if table.isSortable(column.key)}
+								{#if table.isSortable(column.id)}
 									<span class="ml-2">
-										{#if table.getSortState(column.key) === 'asc'}
+										{#if table.getSortState(column.id) === 'asc'}
 											↑
-										{:else if table.getSortState(column.key) === 'desc'}
+										{:else if table.getSortState(column.id) === 'desc'}
 											↓
 										{:else}
 											↕
@@ -110,8 +110,8 @@
 			<Table.Body>
 				{#each table.rows as row (row.id)}
 					<Table.Row>
-						{#each table.columns as column (column.key)}
-							{#if column.key === 'status'}
+						{#each table.columns as column (column.id)}
+							{#if column.id === 'status'}
 								<Table.Cell>
 									<Badge variant={row.status === 'active' ? 'secondary' : 'outline'}>
 										{row.status === 'active' ? 'Active' : 'Inactive'}

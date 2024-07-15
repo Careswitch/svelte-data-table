@@ -3,6 +3,7 @@ type Sorter<T> = (a: T, b: T) => number;
 type Filter<T, V> = (value: V, filterValue: V, row: T) => boolean;
 
 export interface ColumnDef<T, V = any> {
+	id: string;
 	key: keyof T;
 	name: string;
 	sortable?: boolean;
@@ -17,9 +18,9 @@ type TableConfig<T> = {
 	data: T[];
 	columns: ColumnDef<T>[];
 	pageSize?: number;
-	initialSort?: keyof T;
+	initialSort?: string;
 	initialSortDirection?: SortDirection;
-	initialFilters?: { [K in keyof T]?: any[] };
+	initialFilters?: { [id: string]: any[] };
 };
 
 /**
@@ -31,11 +32,11 @@ export class DataTable<T> {
 	#columns = $state<ColumnDef<T>[]>([]);
 	#pageSize = $state(10);
 	#currentPage = $state(1);
-	#sortState = $state<{ column: keyof T | null; direction: SortDirection }>({
-		column: null,
+	#sortState = $state<{ columnId: string | null; direction: SortDirection }>({
+		columnId: null,
 		direction: null
 	});
-	#filterState = $state<{ [K in keyof T]: Set<any> }>({} as any);
+	#filterState = $state<{ [id: string]: Set<any> }>({});
 	#globalFilter = $state<string>('');
 	#globalFilterRegex = $state<RegExp | null>(null);
 
@@ -55,51 +56,54 @@ export class DataTable<T> {
 		this.#pageSize = config.pageSize || 10;
 		if (config.initialSort) {
 			this.#sortState = {
-				column: config.initialSort,
+				columnId: config.initialSort,
 				direction: config.initialSortDirection || 'asc'
 			};
 		}
 		this.#initializeFilterState(config.initialFilters);
 	}
 
-	#initializeFilterState(initialFilters?: { [K in keyof T]?: any[] }) {
+	#initializeFilterState(initialFilters?: { [id: string]: any[] }) {
 		this.#columns.forEach((column) => {
-			const initialFilterValues = initialFilters?.[column.key];
+			const initialFilterValues = initialFilters?.[column.id];
 			if (initialFilterValues) {
-				this.#filterState[column.key] = new Set(initialFilterValues);
+				this.#filterState[column.id] = new Set(initialFilterValues);
 			} else {
-				this.#filterState[column.key] = new Set();
+				this.#filterState[column.id] = new Set();
 			}
 		});
 	}
 
-	#getColumnDef(key: keyof T): ColumnDef<T> | undefined {
-		return this.#columns.find((col) => col.key === key);
+	#getColumnDef(id: string): ColumnDef<T> | undefined {
+		return this.#columns.find((col) => col.id === id);
 	}
 
-	#getValue<K extends keyof T>(row: T, key: K): T[K] | any {
-		const colDef = this.#getColumnDef(key);
-		return colDef && colDef.getValue ? colDef.getValue(row) : row[key];
+	#getValue(row: T, columnId: string): any {
+		const colDef = this.#getColumnDef(columnId);
+		if (!colDef) return undefined;
+		return colDef.getValue ? colDef.getValue(row) : row[colDef.key];
 	}
 
 	#matchesGlobalFilter = (row: T): boolean => {
 		if (!this.#globalFilterRegex) return true;
 
 		return this.#columns.some((col) => {
-			const value = this.#getValue(row, col.key);
+			const value = this.#getValue(row, col.id);
 			return typeof value === 'string' && this.#globalFilterRegex!.test(value);
 		});
 	};
 
 	#matchesFilters = (row: T): boolean => {
-		return (Object.keys(this.#filterState) as Array<keyof T>).every((key) => {
-			const filterSet = this.#filterState[key];
+		return Object.keys(this.#filterState).every((columnId) => {
+			const filterSet = this.#filterState[columnId];
 			if (!filterSet || filterSet.size === 0) return true;
 
-			const colDef = this.#getColumnDef(key);
-			const value = this.#getValue(row, key);
+			const colDef = this.#getColumnDef(columnId);
+			if (!colDef) return true;
 
-			if (colDef && colDef.filter) {
+			const value = this.#getValue(row, columnId);
+
+			if (colDef.filter) {
 				return Array.from(filterSet).some((filterValue) => colDef.filter!(value, filterValue, row));
 			}
 
@@ -120,15 +124,15 @@ export class DataTable<T> {
 	#applySort() {
 		if (!this.#isSortDirty) return;
 
-		const { column, direction } = this.#sortState;
-		if (column && direction) {
-			const colDef = this.#getColumnDef(column);
+		const { columnId, direction } = this.#sortState;
+		if (columnId && direction) {
+			const colDef = this.#getColumnDef(columnId);
 			this.#sortedData = [...this.#filteredData].sort((a, b) => {
 				if (colDef && colDef.sorter) {
 					return direction === 'asc' ? colDef.sorter(a, b) : colDef.sorter(b, a);
 				}
-				const aVal = this.#getValue(a, column);
-				const bVal = this.#getValue(b, column);
+				const aVal = this.#getValue(a, columnId);
+				const bVal = this.#getValue(b, columnId);
 				if (aVal < bVal) return direction === 'asc' ? -1 : 1;
 				if (aVal > bVal) return direction === 'asc' ? 1 : -1;
 				return 0;
@@ -251,17 +255,17 @@ export class DataTable<T> {
 	}
 
 	/**
-	 * Toggles the sort state for a given column.
-	 * @param {keyof T} column - The key of the column to toggle sorting for.
+	 * Toggles the sort direction for the specified column.
+	 * @param {string} columnId - The column id to toggle sorting for.
 	 */
-	toggleSort = (column: keyof T) => {
-		const colDef = this.#getColumnDef(column);
+	toggleSort = (columnId: string) => {
+		const colDef = this.#getColumnDef(columnId);
 		if (!colDef || colDef.sortable === false) return;
 
 		this.#isSortDirty = true;
-		if (this.#sortState.column === column) {
+		if (this.#sortState.columnId === columnId) {
 			this.#sortState = {
-				column,
+				columnId,
 				direction:
 					this.#sortState.direction === 'asc'
 						? 'desc'
@@ -270,77 +274,71 @@ export class DataTable<T> {
 							: 'asc'
 			};
 		} else {
-			this.#sortState = { column, direction: 'asc' };
+			this.#sortState = { columnId, direction: 'asc' };
 		}
 	};
 
 	/**
-	 * Gets the current sort state for a given column.
-	 * @param {keyof T} column - The key of the column to get the sort state for.
-	 * @returns {SortDirection} The current sort direction for the column.
+	 * Gets the current sort state for the specified column.
+	 * @param {string} columnId - The column id to get the sort state for.
 	 */
-	getSortState = (column: keyof T): SortDirection => {
-		return this.#sortState.column === column ? this.#sortState.direction : null;
+	getSortState = (columnId: string): SortDirection => {
+		return this.#sortState.columnId === columnId ? this.#sortState.direction : null;
 	};
 
 	/**
-	 * Checks if a column is sortable.
-	 * @param {keyof T} column - The key of the column to check.
-	 * @returns {boolean} True if the column is sortable, false otherwise.
+	 * Indicates whether the specified column is sortable.
+	 * @param {string} columnId - The column id to check.
 	 */
-	isSortable = (column: keyof T): boolean => {
-		const colDef = this.#getColumnDef(column);
+	isSortable = (columnId: string): boolean => {
+		const colDef = this.#getColumnDef(columnId);
 		return colDef?.sortable !== false;
 	};
 
 	/**
-	 * Sets the filter for a specific column.
-	 * @param {K} column - The key of the column to set the filter for.
-	 * @param {any[]} values - The values to set as the filter.
-	 * @template K
+	 * Sets the filter values for the specified column.
+	 * @param {string} columnId - The column id to set the filter values for.
+	 * @param {any[]} values - The filter values to set.
 	 */
-	setFilter = <K extends keyof T>(column: K, values: any[]) => {
+	setFilter = (columnId: string, values: any[]) => {
 		this.#isFilterDirty = true;
-		this.#filterState = { ...this.#filterState, [column]: new Set(values) };
+		this.#filterState = { ...this.#filterState, [columnId]: new Set(values) };
 		this.#currentPage = 1;
 	};
 
 	/**
-	 * Clears the filter for a specific column.
-	 * @param {keyof T} column - The key of the column to clear the filter for.
+	 * Clears the filter values for the specified column.
+	 * @param {string} columnId - The column id to clear the filter values for.
 	 */
-	clearFilter = (column: keyof T) => {
+	clearFilter = (columnId: string) => {
 		this.#isFilterDirty = true;
-		this.#filterState = { ...this.#filterState, [column]: new Set() };
+		this.#filterState = { ...this.#filterState, [columnId]: new Set() };
 		this.#currentPage = 1;
 	};
 
 	/**
-	 * Toggles a filter value for a specific column.
-	 * @param {K} column - The key of the column to toggle the filter for.
-	 * @param {any} value - The value to toggle in the filter.
-	 * @template K
+	 * Toggles the filter value for the specified column.
+	 * @param {string} columnId - The column id to toggle the filter value for.
+	 * @param {any} value - The filter value to toggle.
 	 */
-	toggleFilter = <K extends keyof T>(column: K, value: any) => {
+	toggleFilter = (columnId: string, value: any) => {
 		this.#isFilterDirty = true;
 		this.#filterState = {
 			...this.#filterState,
-			[column]: this.isFilterActive(column, value)
-				? new Set([...this.#filterState[column]].filter((v) => v !== value))
-				: new Set([...this.#filterState[column], value])
+			[columnId]: this.isFilterActive(columnId, value)
+				? new Set([...this.#filterState[columnId]].filter((v) => v !== value))
+				: new Set([...this.#filterState[columnId], value])
 		};
 
 		this.#currentPage = 1;
 	};
 
 	/**
-	 * Checks if a specific filter value is active for a column.
-	 * @param {K} column - The key of the column to check the filter for.
-	 * @param {any} value - The value to check in the filter.
-	 * @returns {boolean} True if the filter is active for the given value, false otherwise.
-	 * @template K
+	 * Indicates whether the specified filter value is active for the specified column.
+	 * @param {string} columnId - The column id to check.
+	 * @param {any} value - The filter value to check.
 	 */
-	isFilterActive = <K extends keyof T>(column: K, value: any): boolean => {
-		return this.#filterState[column].has(value);
+	isFilterActive = (columnId: string, value: any): boolean => {
+		return this.#filterState[columnId].has(value);
 	};
 }
