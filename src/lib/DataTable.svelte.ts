@@ -180,8 +180,16 @@ export class DataTable<T> {
 	 * The current filter state for all columns.
 	 * @returns {{ [K in keyof T]: Set<any> }} An object representing the filter state that maps column keys to filter values.
 	 */
-	get filters() {
+	get filterState() {
 		return this.#filterState;
+	}
+
+	/**
+	 * The current sort state for the table.
+	 * @returns {{ column: keyof T | null; direction: SortDirection }} An object representing the sort state with a column key and direction.
+	 */
+	get sortState() {
+		return this.#sortState;
 	}
 
 	/**
@@ -293,7 +301,7 @@ export class DataTable<T> {
 	 */
 	setFilter = <K extends keyof T>(column: K, values: any[]) => {
 		this.#isFilterDirty = true;
-		this.#filterState[column] = new Set(values);
+		this.#filterState = { ...this.#filterState, [column]: new Set(values) };
 		this.#currentPage = 1;
 	};
 
@@ -303,7 +311,7 @@ export class DataTable<T> {
 	 */
 	clearFilter = (column: keyof T) => {
 		this.#isFilterDirty = true;
-		this.#filterState[column] = new Set();
+		this.#filterState = { ...this.#filterState, [column]: new Set() };
 		this.#currentPage = 1;
 	};
 
@@ -315,15 +323,13 @@ export class DataTable<T> {
 	 */
 	toggleFilter = <K extends keyof T>(column: K, value: any) => {
 		this.#isFilterDirty = true;
-		const currentFilter = this.#filterState[column];
+		this.#filterState = {
+			...this.#filterState,
+			[column]: this.isFilterActive(column, value)
+				? new Set([...this.#filterState[column]].filter((v) => v !== value))
+				: new Set([...this.#filterState[column], value])
+		};
 
-		if (currentFilter.has(value)) {
-			currentFilter.delete(value);
-		} else {
-			currentFilter.add(value);
-		}
-
-		this.#filterState[column] = new Set(currentFilter);
 		this.#currentPage = 1;
 	};
 
