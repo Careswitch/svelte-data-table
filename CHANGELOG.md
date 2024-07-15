@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.5.0
+
+### Minor Changes
+
+- 48cfdcf: Introduce `id` in column definition to allow multiple columns for the same key
+
 ## 0.4.0
 
 ### Minor Changes
