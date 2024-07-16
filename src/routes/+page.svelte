@@ -78,7 +78,7 @@
 			</Menubar.Root>
 			<Input
 				id="search"
-				aria-label="search"
+				aria-label="Search records"
 				type="text"
 				placeholder="Search"
 				class="md:ml-auto md:max-w-[200px]"
