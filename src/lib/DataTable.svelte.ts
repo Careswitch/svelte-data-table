@@ -206,6 +206,10 @@ export class DataTable<T> {
 	 * @returns {number} The total number of pages.
 	 */
 	get totalPages() {
+		// React to changes in filter state
+		this.#filterState;
+		this.#globalFilterRegex;
+
 		this.#applyFilters();
 		return Math.max(1, Math.ceil(this.#filteredData.length / this.#pageSize));
 	}
@@ -230,6 +234,10 @@ export class DataTable<T> {
 	 * @returns {boolean} True if there's a previous page available, false otherwise.
 	 */
 	get canGoBack() {
+		// React to changes in filter state
+		this.#filterState;
+		this.#globalFilterRegex;
+
 		return this.currentPage > 1 && this.#filteredData.length > 0;
 	}
 
@@ -238,6 +246,10 @@ export class DataTable<T> {
 	 * @returns {boolean} True if there's a next page available, false otherwise.
 	 */
 	get canGoForward() {
+		// React to changes in filter state
+		this.#filterState;
+		this.#globalFilterRegex;
+
 		return this.currentPage < this.totalPages && this.#filteredData.length > 0;
 	}
 
