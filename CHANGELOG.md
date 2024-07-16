@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.5.3
+
+### Patch Changes
+
+- 2ee673a: rows getter should react to `originalData`
+
 ## 0.5.2
 
 ### Patch Changes
