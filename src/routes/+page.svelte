@@ -28,6 +28,9 @@
 		{ label: 'Inactive', value: 'inactive' }
 	];
 </script>
+<svelte:head>
+	<title>Svelte Data Table</title>
+</svelte:head>
 
 <div class="mx-auto h-dvh max-w-7xl px-4 sm:px-6 lg:px-8">
 	<div class="grid h-full grid-cols-1 grid-rows-[auto,auto,1fr,auto]">
@@ -74,6 +77,8 @@
 				</Menubar.Menu>
 			</Menubar.Root>
 			<Input
+				id="search"
+				aria-label="Search records"
 				type="text"
 				placeholder="Search"
 				class="md:ml-auto md:max-w-[200px]"
