@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.5.2
+
+### Patch Changes
+
+- ed69b69: Updating `baseRows` should retrigger filterState
+
 ## 0.5.1
 
 ### Patch Changes
