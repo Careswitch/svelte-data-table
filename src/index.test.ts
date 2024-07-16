@@ -11,9 +11,16 @@ describe('DataTable', () => {
 	];
 
 	const columns = [
-		{ key: 'id', name: 'ID', sortable: true },
-		{ key: 'name', name: 'Name', sortable: true },
-		{ key: 'age', name: 'Age', sortable: true }
+		{ id: 'id', key: 'id', name: 'ID', sortable: true },
+		{ id: 'name', key: 'name', name: 'Name', sortable: true },
+		{ id: 'age', key: 'age', name: 'Age', sortable: true },
+		{
+			id: 'ageGroup',
+			key: 'age',
+			name: 'Age Group',
+			sortable: true,
+			getValue: (row) => (row.age < 30 ? 'Young' : 'Adult')
+		}
 	] satisfies ColumnDef<(typeof sampleData)[0]>[];
 
 	describe('Initialization', () => {
@@ -60,11 +67,17 @@ describe('DataTable', () => {
 			const incompleteData = [
 				{ id: 1, name: 'Alice' },
 				{ id: 2, age: 25 }
-			];
+			] as any[];
 			const table = new DataTable({ data: incompleteData, columns });
 			expect(table.rows).toHaveLength(2);
 			expect(table.rows[0].age).toBeUndefined();
 			expect(table.rows[1].name).toBeUndefined();
+		});
+
+		it('should handle multiple columns with the same key', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			expect(table.columns).toHaveLength(4);
+			expect(table.columns.filter((col) => col.key === 'age')).toHaveLength(2);
 		});
 	});
 
@@ -101,7 +114,7 @@ describe('DataTable', () => {
 
 		it('should handle sorting with custom sorter function', () => {
 			const customColumns = columns.map((col) =>
-				col.key === 'name'
+				col.id === 'name'
 					? {
 							...col,
 							sorter: (a, b) => b.name.localeCompare(a.name) // Reverse alphabetical order
@@ -136,13 +149,21 @@ describe('DataTable', () => {
 				{ id: 1, name: 'Alice', age: null },
 				{ id: 2, name: 'Bob', age: null },
 				{ id: 3, name: 'Charlie', age: null }
-			];
+			] as any[];
 			const table = new DataTable({ data: nullData, columns });
 			table.toggleSort('age');
 			expect(table.rows).toHaveLength(3);
 			// The order should remain unchanged
 			expect(table.rows[0].name).toBe('Alice');
 			expect(table.rows[2].name).toBe('Charlie');
+		});
+
+		it('should sort independently for columns with the same key', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.toggleSort('age');
+			const ageSortState = table.getSortState('age');
+			const ageGroupSortState = table.getSortState('ageGroup');
+			expect(ageSortState).not.toBe(ageGroupSortState);
 		});
 	});
 
@@ -165,6 +186,13 @@ describe('DataTable', () => {
 						(row.age === 30 || row.age === 35) && (row.name === 'Alice' || row.name === 'Charlie')
 				)
 			).toBe(true);
+		});
+
+		it('should filter derived columns', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.setFilter('ageGroup', ['Young']);
+			expect(table.rows).toHaveLength(2);
+			expect(table.rows.every((row) => row.age < 30)).toBe(true);
 		});
 
 		it('should clear filter', () => {
@@ -231,6 +259,13 @@ describe('DataTable', () => {
 			expect(table.rows).toHaveLength(2);
 			expect(table.rows.every((row) => row.name === 'Alice' || row.name === 'Bob')).toBe(true);
 		});
+
+		it('should filter independently for columns with the same key', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.setFilter('age', [30, 35]);
+			table.setFilter('ageGroup', ['Young']);
+			expect(table.rows).toHaveLength(0); // No rows match both filters
+		});
 	});
 
 	describe('Pagination', () => {
@@ -276,19 +311,7 @@ describe('DataTable', () => {
 		});
 	});
 
-	describe('baseRows functionality', () => {
-		const sampleData = [
-			{ id: 1, name: 'Alice', age: 30 },
-			{ id: 2, name: 'Bob', age: 25 },
-			{ id: 3, name: 'Charlie', age: 35 }
-		];
-
-		const columns = [
-			{ key: 'id', name: 'ID', sortable: true },
-			{ key: 'name', name: 'Name', sortable: true },
-			{ key: 'age', name: 'Age', sortable: true }
-		] satisfies ColumnDef<(typeof sampleData)[0]>[];
-
+	describe('baseRows', () => {
 		it('should return the original data when getting baseRows', () => {
 			const table = new DataTable({ data: sampleData, columns });
 			expect(table.baseRows).toEqual(sampleData);
