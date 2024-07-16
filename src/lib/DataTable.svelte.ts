@@ -40,9 +40,8 @@ export class DataTable<T> {
 	#globalFilter = $state<string>('');
 	#globalFilterRegex = $state<RegExp | null>(null);
 
-	#isFilterDirty = $state(true);
-	#isSortDirty = $state(true);
-
+	#isFilterDirty = true;
+	#isSortDirty = true;
 	#filteredData: T[] = [];
 	#sortedData: T[] = [];
 
@@ -165,6 +164,11 @@ export class DataTable<T> {
 	 * @returns {T[]} An array of rows for the current page.
 	 */
 	get rows() {
+		// React to changes in filter state and sort state
+		this.#filterState;
+		this.#sortState;
+		this.#globalFilterRegex;
+
 		this.#applyFilters();
 		this.#applySort();
 		const startIndex = (this.currentPage - 1) * this.#pageSize;
