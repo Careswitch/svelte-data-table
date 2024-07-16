@@ -154,10 +154,9 @@ export class DataTable<T> {
 	 * @param {T[]} rows - The array of rows to reset the base data to.
 	 */
 	set baseRows(rows: T[]) {
-		this.#originalData = [...rows];
 		this.#currentPage = 1;
 		this.#isFilterDirty = true;
-		this.#filterState = this.#filterState;
+		this.#originalData = [...rows];
 	}
 
 	/**
@@ -165,7 +164,8 @@ export class DataTable<T> {
 	 * @returns {T[]} An array of rows for the current page.
 	 */
 	get rows() {
-		// React to changes in filter state and sort state
+		// React to changes in original data, filter state, and sort state
+		this.#originalData;
 		this.#filterState;
 		this.#sortState;
 		this.#globalFilterRegex;
