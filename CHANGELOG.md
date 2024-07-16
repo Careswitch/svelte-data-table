@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.5.4
+
+### Patch Changes
+
+- 17b1089: Pagination accessors should react to filter state
+
 ## 0.5.3
 
 ### Patch Changes
