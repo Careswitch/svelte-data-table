@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.6.0
+
+### Minor Changes
+
+- 4ba9232: Custom `sorter` fn now parameterizes `getValue()` return values in addition to row objects
+
 ## 0.5.4
 
 ### Patch Changes
