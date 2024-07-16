@@ -157,6 +157,7 @@ export class DataTable<T> {
 		this.#originalData = [...rows];
 		this.#currentPage = 1;
 		this.#isFilterDirty = true;
+		this.#filterState = this.#filterState;
 	}
 
 	/**
