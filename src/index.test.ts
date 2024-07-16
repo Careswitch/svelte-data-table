@@ -112,21 +112,6 @@ describe('DataTable', () => {
 			expect(table.getSortState('age')).toBeNull();
 		});
 
-		it('should handle sorting with custom sorter function', () => {
-			const customColumns = columns.map((col) =>
-				col.id === 'name'
-					? {
-							...col,
-							sorter: (a, b) => b.name.localeCompare(a.name) // Reverse alphabetical order
-						}
-					: col
-			) satisfies ColumnDef<(typeof sampleData)[0]>[];
-			const table = new DataTable({ data: sampleData, columns: customColumns });
-			table.toggleSort('name');
-			expect(table.rows[0].name).toBe('Eve');
-			expect(table.rows[4].name).toBe('Alice');
-		});
-
 		it('should maintain sort state when applying filters', () => {
 			const table = new DataTable({ data: sampleData, columns });
 			table.toggleSort('age');
@@ -164,6 +149,87 @@ describe('DataTable', () => {
 			const ageSortState = table.getSortState('age');
 			const ageGroupSortState = table.getSortState('ageGroup');
 			expect(ageSortState).not.toBe(ageGroupSortState);
+		});
+	});
+
+	describe('Enhanced Sorting', () => {
+		const sampleData = [
+			{ id: 1, name: 'Alice', age: 30, score: 85 },
+			{ id: 2, name: 'Bob', age: 25, score: 92 },
+			{ id: 3, name: 'Charlie', age: 35, score: 78 },
+			{ id: 4, name: 'David', age: 28, score: 88 },
+			{ id: 5, name: 'Eve', age: 32, score: 95 }
+		];
+
+		const columns: ColumnDef<(typeof sampleData)[0]>[] = [
+			{ id: 'id', key: 'id', name: 'ID', sortable: true },
+			{ id: 'name', key: 'name', name: 'Name', sortable: true },
+			{ id: 'age', key: 'age', name: 'Age', sortable: true },
+			{ id: 'score', key: 'score', name: 'Score', sortable: true },
+			{
+				id: 'complexSort',
+				key: 'score',
+				name: 'Complex Sort',
+				sortable: true,
+				getValue: (row) => row.score,
+				sorter: (a, b, rowA, rowB) => {
+					// Sort by score, but if scores are equal, sort by age
+					if (a === b) {
+						return rowA.age - rowB.age;
+					}
+					return b - a; // Descending order of scores
+				}
+			}
+		];
+
+		it('should sort using custom sorter with access to full row data', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.toggleSort('complexSort');
+			expect(table.rows[0].name).toBe('Eve'); // Highest score
+			expect(table.rows[1].name).toBe('Bob'); // Second highest score
+			expect(table.rows[2].name).toBe('David'); // Third highest score
+			expect(table.rows[3].name).toBe('Alice'); // Equal score with Charlie, but younger
+			expect(table.rows[4].name).toBe('Charlie'); // Equal score with Alice, but older
+		});
+
+		it('should handle custom sorter with reverse direction', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.toggleSort('complexSort');
+			table.toggleSort('complexSort'); // Toggle twice for descending order
+			expect(table.rows[0].name).toBe('Charlie');
+			expect(table.rows[1].name).toBe('Alice');
+			expect(table.rows[2].name).toBe('David');
+			expect(table.rows[3].name).toBe('Bob');
+			expect(table.rows[4].name).toBe('Eve');
+		});
+
+		it('should use custom sorter with initial sort', () => {
+			const table = new DataTable({
+				data: sampleData,
+				columns,
+				initialSort: 'complexSort',
+				initialSortDirection: 'desc'
+			});
+			expect(table.rows[0].name).toBe('Charlie');
+			expect(table.rows[4].name).toBe('Eve');
+		});
+
+		it('should maintain custom sort when applying filters', () => {
+			const table = new DataTable({ data: sampleData, columns });
+			table.toggleSort('complexSort');
+			table.setFilter('age', [30, 32, 35]); // Filter out Bob and David
+			expect(table.rows).toHaveLength(3);
+			expect(table.rows[0].name).toBe('Eve');
+			expect(table.rows[1].name).toBe('Alice');
+			expect(table.rows[2].name).toBe('Charlie');
+		});
+
+		it('should handle custom sorter with all equal primary values', () => {
+			const equalScoreData = sampleData.map((row) => ({ ...row, score: 90 }));
+			const table = new DataTable({ data: equalScoreData, columns });
+			table.toggleSort('complexSort');
+			expect(table.rows[0].name).toBe('Bob'); // Youngest
+			expect(table.rows[4].name).toBe('Charlie'); // Oldest
 		});
 	});
 

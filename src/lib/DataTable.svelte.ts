@@ -1,5 +1,5 @@
 type ValueGetter<T, V> = (row: T) => V;
-type Sorter<T> = (a: T, b: T) => number;
+type Sorter<T, V> = (a: V, b: V, rowA: T, rowB: T) => number;
 type Filter<T, V> = (value: V, filterValue: V, row: T) => boolean;
 
 export interface ColumnDef<T, V = any> {
@@ -8,7 +8,7 @@ export interface ColumnDef<T, V = any> {
 	name: string;
 	sortable?: boolean;
 	getValue?: ValueGetter<T, V>;
-	sorter?: Sorter<T>;
+	sorter?: Sorter<T, V>;
 	filter?: Filter<T, V>;
 }
 
@@ -127,11 +127,15 @@ export class DataTable<T> {
 		if (columnId && direction) {
 			const colDef = this.#getColumnDef(columnId);
 			this.#sortedData = [...this.#filteredData].sort((a, b) => {
-				if (colDef && colDef.sorter) {
-					return direction === 'asc' ? colDef.sorter(a, b) : colDef.sorter(b, a);
-				}
 				const aVal = this.#getValue(a, columnId);
 				const bVal = this.#getValue(b, columnId);
+
+				if (colDef && colDef.sorter) {
+					return direction === 'asc'
+						? colDef.sorter(aVal, bVal, a, b)
+						: colDef.sorter(bVal, aVal, b, a);
+				}
+
 				if (aVal < bVal) return direction === 'asc' ? -1 : 1;
 				if (aVal > bVal) return direction === 'asc' ? 1 : -1;
 				return 0;
