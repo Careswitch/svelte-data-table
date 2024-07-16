@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.5.1
+
+### Patch Changes
+
+- 94f0694: Ensure row access doesn't mutate state, see: https://github.com/sveltejs/svelte/issues/12457
+
 ## 0.5.0
 
 ### Minor Changes
