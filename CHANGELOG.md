@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.6.1
+
+### Patch Changes
+
+- e44c770: perf: filter matching, sort handling null/undefined, non-capturing group for global filter regex
+
 ## 0.6.0
 
 ### Minor Changes
