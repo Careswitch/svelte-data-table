@@ -150,6 +150,45 @@ describe('DataTable', () => {
 			const ageGroupSortState = table.getSortState('ageGroup');
 			expect(ageSortState).not.toBe(ageGroupSortState);
 		});
+
+		it('should handle sorting with custom getValue returning undefined', () => {
+			const customColumns: ColumnDef<any>[] = [
+				{
+					id: 'customSort',
+					key: 'value',
+					name: 'Custom Sort',
+					sortable: true,
+					getValue: (row) => (row.value === 3 ? undefined : row.value)
+				}
+			];
+			const customData = [
+				{ id: 1, value: 3 },
+				{ id: 2, value: 1 },
+				{ id: 3, value: 2 }
+			];
+			const table = new DataTable({ data: customData, columns: customColumns });
+			table.toggleSort('customSort');
+			expect(table.rows[0].value).toBe(1);
+			expect(table.rows[1].value).toBe(2);
+			expect(table.rows[2].value).toBe(3);
+		});
+
+		it('should maintain sort stability for equal elements', () => {
+			const data = [
+				{ id: 1, value: 'A', order: 1 },
+				{ id: 2, value: 'B', order: 2 },
+				{ id: 3, value: 'A', order: 3 },
+				{ id: 4, value: 'C', order: 4 },
+				{ id: 5, value: 'B', order: 5 }
+			];
+			const columns: ColumnDef<(typeof data)[0]>[] = [
+				{ id: 'value', key: 'value', name: 'Value', sortable: true },
+				{ id: 'order', key: 'order', name: 'Order', sortable: true }
+			];
+			const table = new DataTable({ data, columns });
+			table.toggleSort('value');
+			expect(table.rows.map((r) => r.id)).toEqual([1, 3, 2, 5, 4]);
+		});
 	});
 
 	describe('Enhanced Sorting', () => {
@@ -332,6 +371,48 @@ describe('DataTable', () => {
 			table.setFilter('ageGroup', ['Young']);
 			expect(table.rows).toHaveLength(0); // No rows match both filters
 		});
+
+		it('should handle filtering with complex custom filter function', () => {
+			const customColumns: ColumnDef<any>[] = [
+				{
+					id: 'complexFilter',
+					key: 'value',
+					name: 'Complex Filter',
+					filter: (value, filterValue, row) => {
+						return value > filterValue && row.id % 2 === 0;
+					}
+				}
+			];
+			const customData = [
+				{ id: 1, value: 10 },
+				{ id: 2, value: 20 },
+				{ id: 3, value: 30 },
+				{ id: 4, value: 40 }
+			];
+			const table = new DataTable({ data: customData, columns: customColumns });
+			table.setFilter('complexFilter', [15]);
+			expect(table.rows).toHaveLength(2);
+			expect(table.rows[0].id).toBe(2);
+			expect(table.rows[1].id).toBe(4);
+		});
+
+		it('should handle filtering with extremely long filter lists', () => {
+			const longFilterList = Array.from({ length: 10000 }, (_, i) => i);
+			const table = new DataTable({ data: sampleData, columns });
+			table.setFilter('age', longFilterList);
+			expect(table.rows).toHaveLength(5); // All rows should match
+		});
+
+		it('should handle global filter with special regex characters', () => {
+			const data = [
+				{ id: 1, name: 'Alice (Manager)' },
+				{ id: 2, name: 'Bob [Developer]' }
+			] as any;
+			const table = new DataTable({ data, columns });
+			table.globalFilter = '(Manager)';
+			expect(table.rows).toHaveLength(1);
+			expect(table.rows[0].name).toBe('Alice (Manager)');
+		});
 	});
 
 	describe('Pagination', () => {
@@ -374,6 +455,21 @@ describe('DataTable', () => {
 			const table = new DataTable({ data: sampleData, columns, pageSize: 10 });
 			expect(table.rows).toHaveLength(5);
 			expect(table.totalPages).toBe(1);
+		});
+
+		it('should handle setting page size to 0', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 0 });
+			expect(table.rows).toHaveLength(5); // Should default to showing all rows
+		});
+
+		it('should handle navigation near total page count', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			table.currentPage = 3;
+			expect(table.canGoForward).toBe(false);
+			expect(table.canGoBack).toBe(true);
+			table.currentPage = 2;
+			expect(table.canGoForward).toBe(true);
+			expect(table.canGoBack).toBe(true);
 		});
 	});
 

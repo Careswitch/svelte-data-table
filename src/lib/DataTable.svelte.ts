@@ -28,9 +28,10 @@ type TableConfig<T> = {
  * @template T The type of data items in the table.
  */
 export class DataTable<T> {
+	#columns: ColumnDef<T>[];
+	#pageSize: number;
+
 	#originalData = $state<T[]>([]);
-	#columns = $state<ColumnDef<T>[]>([]);
-	#pageSize = $state(10);
 	#currentPage = $state(1);
 	#sortState = $state<{ columnId: string | null; direction: SortDirection }>({
 		columnId: null,
@@ -38,8 +39,8 @@ export class DataTable<T> {
 	});
 	#filterState = $state<{ [id: string]: Set<any> }>({});
 	#globalFilter = $state<string>('');
-	#globalFilterRegex = $state<RegExp | null>(null);
 
+	#globalFilterRegex: RegExp | null = null;
 	#isFilterDirty = true;
 	#isSortDirty = true;
 	#filteredData: T[] = [];
@@ -93,8 +94,7 @@ export class DataTable<T> {
 	};
 
 	#matchesFilters = (row: T): boolean => {
-		return Object.keys(this.#filterState).every((columnId) => {
-			const filterSet = this.#filterState[columnId];
+		return Object.entries(this.#filterState).every(([columnId, filterSet]) => {
 			if (!filterSet || filterSet.size === 0) return true;
 
 			const colDef = this.#getColumnDef(columnId);
@@ -103,7 +103,12 @@ export class DataTable<T> {
 			const value = this.#getValue(row, columnId);
 
 			if (colDef.filter) {
-				return Array.from(filterSet).some((filterValue) => colDef.filter!(value, filterValue, row));
+				for (const filterValue of filterSet) {
+					if (colDef.filter(value, filterValue, row)) {
+						return true;
+					}
+				}
+				return false;
 			}
 
 			return filterSet.has(value);
@@ -130,10 +135,17 @@ export class DataTable<T> {
 				const aVal = this.#getValue(a, columnId);
 				const bVal = this.#getValue(b, columnId);
 
+				if (aVal === undefined || aVal === null) return direction === 'asc' ? 1 : -1;
+				if (bVal === undefined || bVal === null) return direction === 'asc' ? -1 : 1;
+
 				if (colDef && colDef.sorter) {
 					return direction === 'asc'
 						? colDef.sorter(aVal, bVal, a, b)
 						: colDef.sorter(bVal, aVal, b, a);
+				}
+
+				if (typeof aVal === 'string' && typeof bVal === 'string') {
+					return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
 				}
 
 				if (aVal < bVal) return direction === 'asc' ? -1 : 1;
@@ -170,13 +182,14 @@ export class DataTable<T> {
 	get rows() {
 		// React to changes in original data, filter state, and sort state
 		this.#originalData;
-		this.#filterState;
 		this.#sortState;
-		this.#globalFilterRegex;
+		this.#filterState;
+		this.#globalFilter;
 
 		this.#applyFilters();
 		this.#applySort();
-		const startIndex = (this.currentPage - 1) * this.#pageSize;
+
+		const startIndex = (this.#currentPage - 1) * this.#pageSize;
 		const endIndex = startIndex + this.#pageSize;
 		return this.#sortedData.slice(startIndex, endIndex);
 	}
@@ -212,9 +225,10 @@ export class DataTable<T> {
 	get totalPages() {
 		// React to changes in filter state
 		this.#filterState;
-		this.#globalFilterRegex;
+		this.#globalFilter;
 
 		this.#applyFilters();
+
 		return Math.max(1, Math.ceil(this.#filteredData.length / this.#pageSize));
 	}
 
@@ -270,7 +284,14 @@ export class DataTable<T> {
 	 */
 	set globalFilter(value: string) {
 		this.#globalFilter = value;
-		this.#globalFilterRegex = value.trim() !== '' ? new RegExp(value, 'i') : null;
+
+		try {
+			this.#globalFilterRegex = value.trim() !== '' ? new RegExp(`(?:${value})`, 'i') : null;
+		} catch (error) {
+			console.error('Invalid regex pattern:', error);
+			this.#globalFilterRegex = null;
+		}
+
 		this.#currentPage = 1;
 		this.#isFilterDirty = true;
 	}
