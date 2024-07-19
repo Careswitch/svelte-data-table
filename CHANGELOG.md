@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.6.3
+
+### Patch Changes
+
+- 267e6ba: Added allRows getter to retrieve all unpaginated filtered and sorted table rows
+
 ## 0.6.2
 
 ### Patch Changes
