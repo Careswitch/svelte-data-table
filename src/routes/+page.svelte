@@ -73,6 +73,7 @@
 					</Menubar.Content>
 				</Menubar.Menu>
 			</Menubar.Root>
+
 			<Input
 				type="text"
 				placeholder="Search"
@@ -148,6 +149,9 @@
 				Page <span class="font-semibold">{table.currentPage}</span> of
 				<span class="font-semibold">{table.totalPages}</span>
 			</p>
+			<span class="text-xs">
+				({table.allRows.length} / {table.baseRows.length})
+			</span>
 		</div>
 	</div>
 </div>
