@@ -223,7 +223,8 @@ export class DataTable<T> {
 	 * @returns {number} The total number of pages.
 	 */
 	get totalPages() {
-		// React to changes in filter state
+		// React to changes in original data and filter state
+		this.#originalData;
 		this.#filterState;
 		this.#globalFilter;
 
