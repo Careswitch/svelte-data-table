@@ -575,4 +575,99 @@ describe('DataTable', () => {
 			expect(table.baseRows[0].name).toBe('Frank');
 		});
 	});
+
+	describe('allRows', () => {
+		const sampleData = [
+			{ id: 1, name: 'Alice', age: 30 },
+			{ id: 2, name: 'Bob', age: 25 },
+			{ id: 3, name: 'Charlie', age: 35 },
+			{ id: 4, name: 'David', age: 28 },
+			{ id: 5, name: 'Eve', age: 32 }
+		];
+
+		const columns = [
+			{ id: 'id', key: 'id', name: 'ID', sortable: true },
+			{ id: 'name', key: 'name', name: 'Name', sortable: true },
+			{ id: 'age', key: 'age', name: 'Age', sortable: true }
+		] satisfies ColumnDef<(typeof sampleData)[0]>[];
+
+		it('should return all rows when no filtering or sorting is applied', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			expect(table.allRows).toHaveLength(5);
+			expect(table.allRows).toEqual(sampleData);
+		});
+
+		it('should return all filtered rows regardless of pagination', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			table.setFilter('age', [30, 35]);
+			expect(table.rows).toHaveLength(2); // Due to pagination
+			expect(table.allRows).toHaveLength(2); // All matching rows
+			expect(table.allRows.every((row) => row.age === 30 || row.age === 35)).toBe(true);
+		});
+
+		it('should return all sorted rows', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			table.toggleSort('age');
+			expect(table.allRows).toHaveLength(5);
+			expect(table.allRows[0].age).toBe(25);
+			expect(table.allRows[4].age).toBe(35);
+		});
+
+		it('should return all filtered and sorted rows', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			table.setFilter('age', [30, 32, 35]);
+			table.toggleSort('age');
+			expect(table.allRows).toHaveLength(3);
+			expect(table.allRows[0].age).toBe(30);
+			expect(table.allRows[1].age).toBe(32);
+			expect(table.allRows[2].age).toBe(35);
+		});
+
+		it('should update when global filter is applied', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			table.globalFilter = 'a'; // Matches 'Alice' and 'Charlie' and 'David'
+			expect(table.allRows).toHaveLength(3);
+			expect(table.allRows.every((row) => ['Alice', 'Charlie', 'David'].includes(row.name))).toBe(
+				true
+			);
+		});
+
+		it('should return an empty array when no rows match the filters', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			table.setFilter('age', [100]); // No rows have age 100
+			expect(table.allRows).toHaveLength(0);
+		});
+
+		it('should reflect changes when baseRows is updated', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+			const newData = [
+				{ id: 6, name: 'Frank', age: 40 },
+				{ id: 7, name: 'Grace', age: 45 }
+			];
+			table.baseRows = newData;
+			expect(table.allRows).toHaveLength(2);
+			expect(table.allRows).toEqual(newData);
+		});
+
+		it('should contain all filtered and sorted rows while rows respects pagination', () => {
+			const table = new DataTable({ data: sampleData, columns, pageSize: 2 });
+
+			table.setFilter('age', [30, 32, 35]);
+			table.toggleSort('age');
+
+			expect(table.allRows).toHaveLength(3);
+			expect(table.allRows.map((row) => row.age)).toEqual([30, 32, 35]);
+
+			expect(table.rows).toHaveLength(2);
+			expect(table.rows.map((row) => row.age)).toEqual([30, 32]);
+
+			table.currentPage = 2;
+
+			expect(table.allRows).toHaveLength(3);
+			expect(table.allRows.map((row) => row.age)).toEqual([30, 32, 35]);
+
+			expect(table.rows).toHaveLength(1);
+			expect(table.rows.map((row) => row.age)).toEqual([35]);
+		});
+	});
 });

@@ -176,10 +176,10 @@ export class DataTable<T> {
 	}
 
 	/**
-	 * The current page of rows based on applied filters and sorting.
-	 * @returns {T[]} An array of rows for the current page.
+	 * Returns all filtered and sorted rows without pagination.
+	 * @returns {T[]} An array of all filtered and sorted rows.
 	 */
-	get rows() {
+	get allRows() {
 		// React to changes in original data, filter state, and sort state
 		this.#originalData;
 		this.#sortState;
@@ -189,9 +189,17 @@ export class DataTable<T> {
 		this.#applyFilters();
 		this.#applySort();
 
+		return this.#sortedData;
+	}
+
+	/**
+	 * The current page of rows based on applied filters and sorting.
+	 * @returns {T[]} An array of rows for the current page.
+	 */
+	get rows() {
 		const startIndex = (this.#currentPage - 1) * this.#pageSize;
 		const endIndex = startIndex + this.#pageSize;
-		return this.#sortedData.slice(startIndex, endIndex);
+		return this.allRows.slice(startIndex, endIndex);
 	}
 
 	/**
