@@ -1,5 +1,11 @@
 # @careswitch/svelte-data-table
 
+## 0.6.2
+
+### Patch Changes
+
+- e5b1ed1: fix: `totalPages` should react to changes in base rows
+
 ## 0.6.1
 
 ### Patch Changes
