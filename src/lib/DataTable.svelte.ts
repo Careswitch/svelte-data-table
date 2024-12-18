@@ -23,7 +23,10 @@ type TableConfig<T> = {
 	initialFilters?: { [id: string]: any[] };
 };
 
-type StoreState = { columnId: string | null; direction: SortDirection }
+type StoreState = { 
+	columnId: string | null; 
+	direction: SortDirection 
+}
 
 /**
  * Represents a data table with sorting, filtering, and pagination capabilities.
