@@ -159,13 +159,19 @@ export class DataTable<T> {
 		}
 		this.#isSortDirty = false;
 	}
-
-	setSortState(value: StoreState) {
+	/**
+	 * Sets the current sort state for the table.
+	 */
+	setCurrentSortState(value: StoreState) {
 		this.#sortState = value;
 		this.#applySort();
 	}
 
-	getSortState(): StoreState {
+	/**
+	 * Gets the current sort state for the table.
+	 * @returns {StoreState} The current sort state.
+	 */
+	getCurrentSortState(): StoreState {
 		return this.#sortState
 	}
 
